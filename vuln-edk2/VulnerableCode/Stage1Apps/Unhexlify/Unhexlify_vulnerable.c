@@ -135,11 +135,6 @@ ShellAppMain( UINTN Argc,
         return Status;
       }
 
-      if (strlen/2 > sizeof(buff)) {
-        Print(L"Input too long!\n");
-        return Status;
-      }
-
       for (UINTN i = 0; i < strlen; i += 2) {
         UINT8 high = HexDigitToValue(Argv[1][i]);
         UINT8 low = HexDigitToValue(Argv[1][i+1]);

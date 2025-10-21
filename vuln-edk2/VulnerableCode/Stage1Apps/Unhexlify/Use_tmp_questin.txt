@@ -1,0 +1,7 @@
+In einem separaten WSL Terminal folgenden Befehl eingeben
+
+echo "Unhexlify 414243" | sudo tee /tmp/guest.in > /dev/null
+
+Nutzen eines Python Skripts für lange Eingaben
+
+sudo python3 Long_input.py
