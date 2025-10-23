@@ -1,0 +1,50 @@
+Shell starten
+
+FS0:
+
+cd bmps
+
+DisplayBMP.efi -v crash_bmp.bmp
+
+Um einen solchen Crash (Heap Overflow) wirklich auszunutzen und eigenen Code auszuführen, sind in der Praxis mehrere fortgeschrittene Schritte nötig. Hier ein Überblick, wie ein Exploit in einer klassischen Umgebung funktionieren könnte – und was in UEFI besonders zu beachten ist:
+
+1. Heap-Layout und Zielobjekt bestimmen
+Analysiere, welche Strukturen/Funktionszeiger im Heap nach deinem Buffer liegen.
+Ziel: Überschreibe z. B. einen Funktionszeiger, einen Rücksprungzeiger oder Heap-Metadaten.
+2. Präzises Überschreiben
+Baue dein BMP so, dass die „Pixel“-Daten gezielt den Speicher hinter dem Buffer überschreiben.
+Platziere z. B. eine Adresse (z. B. von Shellcode oder einer ROP-Chain) an die Stelle eines Funktionszeigers.
+3. Shellcode/ROP-Chain vorbereiten
+Lege eigenen Code (Shellcode) oder eine ROP-Chain an eine bekannte Stelle im Speicher ab.
+In UEFI ist das schwierig, weil der Heap meist nicht ausführbar ist (NX-Bit).
+4. Triggern der Codeausführung
+Sorge dafür, dass das Programm nach dem Overflow eine Funktion aufruft, deren Zeiger du kontrollierst (z. B. FreePool, Callback).
+Wird der manipulierte Zeiger dereferenziert, springt die Ausführung zu deinem Code.
+5. Besonderheiten in UEFI
+UEFI ist kein klassisches Betriebssystem: Es gibt keine Shell, keine Standard-Syscalls, keine klassischen Prozesse.
+Viele Schutzmechanismen (NX, ASLR, Stack-Canaries) erschweren Exploits.
+Du müsstest UEFI-APIs nutzen, um z. B. Speicher zu schreiben, zu lesen oder die Kontrolle zu übernehmen.
+Beispiel für einen klassischen Heap-Overflow-Exploit (C/Pseudocode)
+// Angenommen, nach dem Buffer liegt ein Funktionszeiger:
+struct {
+    char buf[16];
+    void (*func)();
+} *obj = malloc(sizeof(*obj));
+
+// Angreifer überschreibt buf und func:
+memcpy(obj->buf, payload, 32); // payload enthält Shellcode-Adresse an passender Stelle
+
+// Später im Code:
+obj->func(); // springt zu Angreifer-Code
+In UEFI
+Du müsstest herausfinden, ob nach dem Buffer ein Funktionszeiger oder eine wichtige Struktur liegt.
+Dann könntest du mit deinem BMP gezielt diesen Zeiger überschreiben.
+Das ist sehr komplex und erfordert Debugging, Reverse Engineering und genaue Kenntnis der UEFI-Implementierung.
+Fazit:
+Ein Crash ist der erste Schritt. Für einen echten Exploit brauchst du:
+
+Heap-Layout-Analyse (Reverse Engineering, ggf. mit Debugger)
+Präzises Überschreiben eines Zielobjekts
+Platzieren von Shellcode/ROP-Chain
+Triggern der Ausführung
+In UEFI ist das sehr anspruchsvoll und meist nur mit viel Erfahrung und Tools (z. B. QEMU mit Debugger, GDB, IDA Pro) möglich.

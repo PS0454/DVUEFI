@@ -31,7 +31,8 @@ We do that using `--volume`
 ```console
 docker run --volume /mnt/d/git/github/Firmare_UEFI/DVUEFI/vuln-edk2:/home/vuln-edk2 --rm -it dvuefi-build
 
-das klappt nicht nutze absoluten pfad:docker run --volume ./vuln-edk2:/home/vuln-edk2 --rm -it dvuefi-build
+das klappt nicht nutze absoluten pfad:
+docker run --volume ./vuln-edk2:/home/vuln-edk2 --rm -it dvuefi-build
 
 user@docker:/home#
 ```

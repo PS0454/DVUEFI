@@ -135,22 +135,13 @@ DisplayImage( EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop,
     // Palette    = (UINT32*) ((UINT8*)BmpBuffer + 0x36);
     // Pixels     = BmpHeader->PixelWidth * BmpHeader->PixelHeight;
 
-
-    // FIX: Heap Overflow verhindern!
-    // Statt der (manipulierbaren) ImageSize aus dem BMP-Header wird die benötigte Bildgröße selbst berechnet.
-    // Dadurch kann ein Angreifer nicht mehr durch einen zu kleinen Wert im Header zu wenig Speicher allokieren lassen.
-    // Berechnung: Breite * Höhe * Bytes pro Pixel (bei 24 Bit: 3 Bytes pro Pixel)
-    UINTN expectedImageSize = BmpHeader->PixelWidth * BmpHeader->PixelHeight * (BmpHeader->BitPerPixel / 8);
-    // Optional: Warnung, falls ImageSize im Header nicht zur berechneten Größe passt
-    if (BmpHeader->ImageSize != expectedImageSize) {
-        Print(L"WARNUNG: ImageSize im Header (%d) stimmt nicht mit berechneter Bildgröße (%d) überein!\n", BmpHeader->ImageSize, expectedImageSize);
-    }
-    // Speicher für Bilddaten sicher allokieren
-    BltBuffer = AllocateZeroPool(expectedImageSize);
-    if (BltBuffer == NULL) {
-        Print(L"ERROR: BltBuffer. No memory resources\n");
-        return EFI_OUT_OF_RESOURCES;
-    }
+    //VULN: Allocate buffer from headr size field and not from calculated Width * Height
+	//BltBuffer = AllocateZeroPool( sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL) * Pixels);
+	BltBuffer = AllocateZeroPool(BmpHeader->ImageSize);
+    // if (BltBuffer == NULL) {
+        // Print(L"ERROR: BltBuffer. No memory resources\n");
+        // return EFI_OUT_OF_RESOURCES;
+    // }
 
     Image       = (UINT8 *)BmpBuffer;
     BmpColorMap = (BMP_COLOR_MAP *) (Image + sizeof (BMP_IMAGE_HEADER));
