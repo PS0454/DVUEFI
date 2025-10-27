@@ -1,0 +1,17 @@
+Zugriff auf eine EFI-Binärdatei unter SecureBoot
+
+Um eine EFI-Binärdatei (z. B. display_smiley.efi) unter aktivem SecureBoot ausführen zu können, muss diese Datei mit einem gültigen Schlüssel signiert werden, der von der Firmware als vertrauenswürdig eingestuft wird. Im Rahmen der Challenge ist ein privater Schlüssel (PkKek1.private.key) und das zugehörige Zertifikat (PkKek1.crt oder PkKek1.pem) im Verzeichnis Stage2SecureBoot/certs/ geleakt.
+
+Der technische Ablauf ist wie folgt:
+1. Die Binärdatei wird mit dem Tool sbsign und dem privaten Schlüssel sowie dem Zertifikat signiert:
+	sbsign --key PkKek1.private.key --cert PkKek1.crt --output display_smiley.signed.efi display_smiley.efi
+
+2. Beim Signieren wird ein Authenticode-Signaturblock (Microsoft Authenticode/EFI Signature List) an die Binärdatei angehängt. Dieser enthält eine digitale Signatur, die mit dem privaten Schlüssel erzeugt wurde und mit dem öffentlichen Zertifikat verifizierbar ist.
+
+3. Die signierte Datei (display_smiley.signed.efi) wird in das Verzeichnis kopiert, aus dem die UEFI-Shell sie lädt (z. B. Level1SignApp/MountedDrive).
+
+4. Nach Aktivierung von SecureBoot (EnrollDefaultKeys.efi --no-default) prüft die Firmware beim Ausführen der Datei die Signatur. Ist diese gültig und das Zertifikat in der Firmware hinterlegt, wird die Datei ausgeführt. Andernfalls erscheint eine Fehlermeldung (Access Denied).
+
+Durch das Signieren wird die Binärdatei um einen Signaturblock erweitert, der die Integrität und Authentizität sicherstellt. Die eigentlichen Programmfunktionen bleiben unverändert, es wird lediglich die Metadatenstruktur am Dateiende ergänzt.
+
+Diese Vorgehensweise ist essentiell, um unter SecureBoot beliebige EFI-Anwendungen ausführen zu können und ist ein zentrales Element moderner Boot-Sicherheitsarchitekturen.
