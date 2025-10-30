@@ -45,6 +45,8 @@ In order to run `display_smiley.efi` we have to sign it, but to do so we have to
 Oh no! The private key file is leaked somewhere inside `Stage2SecureBoot`! Can you find it?
 Once you do, head over to `Level1SignApp` which runs `Level1SignApp/MountedDrive/display_smiley.efi`, and try to sign it (`sbsign` might be helpful!).
 
+sbsign --key ../../certs/PkKek1.private.key --cert ../../certs/PkKek1.pem --output display_smiley.signed.efi display_smiley.efi
+
 Then run `run_level1.sh` again and see if the signed version of `display_smiley.efi` runs despite secure boot.
 If it does, you're done!
 
@@ -52,8 +54,20 @@ Note, you can always run `setup.sh` again to reset SecureBoot, and you'll have t
 
 # Challenge 2: Vulnerable Grub
 This challenge is based on a real-life GRUB vulnerability, dubbed [BootHole](https://eclypsium.com/blog/theres-a-hole-in-the-boot/).
+
+Mache Run shell und dann enabel secure boot dann erst neue sheell mit run_grub und dann muss grub auch signiert werden
+
+Signieren:
+sbsign --key ../../../../certs/PkKek1.private.key --cert ../../../../certs/PkKek1.pem --output BOOTx64.signed.EFI BOOTx64.EFI
+
+sbsign --key ../../../../certs/PkKek1.private.key --cert ../../../../certs/PkKek1.pem --output grubx64.signed.efi grubx64.efi
+
 After enabling secure boot using `EnrollDefaultKeys.efi`, head over to `Level2Grub` and execute `./run_grub.sh`.
 GRUB will run and since there's nothing to boot, exit to the boot manager.
 
 There's some trickery you can do by modifying `MountedDrive/EFI/BOOT/grub.cfg`.
 Can you cause a crash?
+
+
+
+Ohne Signtur ausführung einer leeren shell
